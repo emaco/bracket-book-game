@@ -286,14 +286,14 @@ async function bye(c){
 function champion(c){
   phase='champ';
   $('ov').classList.add('on'); $('ovLabel').textContent='🏆 CAMPEÓN 🏆'; $('ovBig').textContent='';
-  if(c.img){ $('ovChamp').style.backgroundImage='url('+c.img+')'; $('ovChamp').style.display='block'; $('ovChamp').classList.add('play'); }
+  if(c.img){ $('ovChamp').style.backgroundImage='url("'+c.img+'")'; $('ovChamp').style.display='block'; $('ovChamp').classList.add('play'); }
   $('ovName').textContent=c.name; $('ovHint').style.display='block';
   startConfetti();
 }
 function replay(){ gen++; phase='title'; $('ovChamp').classList.remove('play'); stopConfetti(); $('ov').classList.remove('on'); show('title'); }
 
 function setPhoto(el,c){ const s=el.querySelector('span');
-  if(c&&c.img){ el.style.backgroundImage='url('+c.img+')'; s.textContent=c.name;
+  if(c&&c.img){ el.style.backgroundImage='url("'+c.img+'")'; s.textContent=c.name;
     const im=new Image(); im.onload=()=>s.textContent=''; im.onerror=()=>{el.style.backgroundImage='none';}; im.src=c.img; }
   else { el.style.backgroundImage='none'; s.textContent=c?c.name:''; } }
 
