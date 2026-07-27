@@ -66,7 +66,7 @@
          transition:transform .18s; cursor:pointer; }
   #cardL{ left:20%; }
   #cardR{ right:20%; }
-  .card .photo{ width:74%; aspect-ratio:3/4; border-radius:1.2vh; background:#e9dfe8 center/cover no-repeat;
+  .card .photo{ width:74%; height:38vh; border-radius:1.2vh; background:#e9dfe8 center/cover no-repeat;
                 overflow:hidden; display:flex; align-items:center; justify-content:center; }
   .card .photo span{ color:#b06; font-weight:600; font-size:2.4vh; padding:1vh; }
   .card .nm{ margin-top:1.4vh; font-weight:700; color:#c81e8a; text-shadow:.3vh .3vh 0 #8f1263;
@@ -95,7 +95,7 @@
   #ov.on{ display:flex; z-index:7; }
   #ovLabel{ font-weight:700; color:#fff; text-shadow:.3vh .3vh 0 rgba(0,0,0,.3); font-size:4.6vh; }
   #ovBig{ font-weight:700; color:#ffd94b; text-shadow:.6vh .6vh 0 rgba(0,0,0,.3); font-size:12vh; }
-  #ovChamp{ width:32vh; aspect-ratio:3/4; border-radius:1.4vh; background:#fff center/cover; display:none; }
+  #ovChamp{ width:32vh; height:42vh; border-radius:1.4vh; background:#fff center/cover; display:none; }
   @keyframes champFloat{ 0%,100%{ transform:translateY(0) rotate(-1.5deg); }
                          50%{ transform:translateY(-1.4vh) rotate(1.5deg); } }
   @keyframes champGlow{ 0%,100%{ box-shadow:0 0 2vh .4vh rgba(255,217,75,.55); }
@@ -187,20 +187,26 @@ const stage=$('stage'); stage.focus();
 stage.addEventListener('click',()=>stage.focus());
 
 // central key handler for the TV remote
-window.addEventListener('keydown', e=>{
-  const k=e.key;
-  if(k==='ArrowLeft'||k==='ArrowRight'){
-    if(phase==='pick'){ sel = k==='ArrowLeft'?0:1; paintSel(); e.preventDefault(); }
+function advance(){
+  if(phase==='title'){ goReglas(); }
+  else if(phase==='reglas'){ if(enterResolver){const r=enterResolver;enterResolver=null;r();} }
+  else if(phase==='pick'){ if(pickResolver){const r=pickResolver;pickResolver=null;r(sel);} }
+  else if(phase==='champ'){ replay(); }
+}
+function handleKey(e){
+  const k=e.key, c=e.keyCode||e.which;
+  const isLeft  = k==='ArrowLeft'  || k==='Left'  || c===37;
+  const isRight = k==='ArrowRight' || k==='Right' || c===39;
+  const isOK    = k==='Enter' || k===' ' || k==='Spacebar' || k==='Select' || k==='OK'
+                  || c===13 || c===32 || c===23 /*android dpad center*/ || c===10009 /*some TVs*/;
+  if(isLeft || isRight){
+    if(phase==='pick'){ sel = isLeft?0:1; paintSel(); e.preventDefault(); }
     return;
   }
-  if(k==='Enter'|| k===' '){
-    e.preventDefault();
-    if(phase==='title'){ goReglas(); }
-    else if(phase==='reglas'){ if(enterResolver){const r=enterResolver;enterResolver=null;r();} }
-    else if(phase==='pick'){ if(pickResolver){const r=pickResolver;pickResolver=null;r(sel);} }
-    else if(phase==='champ'){ replay(); }
-  }
-});
+  if(isOK){ e.preventDefault(); advance(); }
+}
+window.addEventListener('keydown', handleKey, true);
+document.addEventListener('keydown', handleKey, true);
 
 function paintSel(){
   $('cardL').classList.toggle('sel', sel===0);
