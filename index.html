@@ -379,6 +379,14 @@ function tapCard(side){
 }
 $('cardL').addEventListener('click',()=>tapCard(0));
 $('cardR').addEventListener('click',()=>tapCard(1));
+// Samsung/LG TV browsers drive an (often invisible) mouse cursor from the
+// D-pad and fire a click at the cursor position for OK, with no keydown
+// for the arrows themselves. Without hover feedback the highlight never
+// moves until you click, so a single OK looks like it "does nothing" the
+// first time. Mirror the highlight to cursor position as it crosses a card.
+function hoverCard(side){ if(phase==='pick' && sel!==side){ sel=side; paintSel(); } }
+$('cardL').addEventListener('mouseover',()=>hoverCard(0));
+$('cardR').addEventListener('mouseover',()=>hoverCard(1));
 // tapping anywhere advances the same things Enter does
 stage.addEventListener('click', e=>{
   startMusic();
