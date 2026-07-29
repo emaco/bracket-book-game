@@ -10,9 +10,9 @@
   html,body{ height:100%; }
   body{ font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif; background:#1a1020;
         display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  #stage{ position:relative; width:min(100vw,177.78vh); height:min(56.25vw,100vh);
+  #stage{ position:relative; width:100%; height:100%;
           background:#f6d7e4 center/cover no-repeat; overflow:hidden; box-shadow:0 0 40px rgba(0,0,0,.4); }
-  .screen{ position:absolute; inset:0; display:none; background:center/cover no-repeat; }
+  .screen{ position:absolute; top:0; right:0; bottom:0; left:0; display:none; background:center/cover no-repeat; }
   .screen.on{ display:block; }
   .bubble{ font-weight:700; color:#c81e8a; text-shadow:2px 2px 0 #8f1263; }
 
@@ -57,7 +57,7 @@
   @keyframes timerPulse{ 0%,100%{ transform:translateX(-50%) scale(1); } 50%{ transform:translateX(-50%) scale(1.12); } }
 
   /* full-screen red flash for last 5s */
-  #redflash{ position:absolute; inset:0; z-index:3; pointer-events:none; background:#ff2d4d; opacity:0; }
+  #redflash{ position:absolute; top:0; right:0; bottom:0; left:0; z-index:3; pointer-events:none; background:#ff2d4d; opacity:0; }
   #redflash.on{ animation:redFlash 1s ease-in-out infinite; }
   @keyframes redFlash{ 0%,100%{ opacity:0; } 50%{ opacity:.28; } }
 
@@ -88,9 +88,9 @@
                 display:flex; align-items:flex-start; justify-content:center; overflow:hidden; }
 
   /* OVERLAY */
-  #confetti{ position:absolute; inset:0; z-index:9; pointer-events:none; display:none; }
+  #confetti{ position:absolute; top:0; right:0; bottom:0; left:0; z-index:9; pointer-events:none; display:none; }
   #confetti.on{ display:block; }
-  #ov{ position:absolute; inset:0; background:rgba(70,20,55,.9); display:none;
+  #ov{ position:absolute; top:0; right:0; bottom:0; left:0; background:rgba(70,20,55,.9); display:none;
        flex-direction:column; align-items:center; justify-content:center; gap:2vh; z-index:5; }
   #ov.on{ display:flex; z-index:7; }
   #ovLabel{ font-weight:700; color:#fff; text-shadow:.3vh .3vh 0 rgba(0,0,0,.3); font-size:4.6vh; }
@@ -164,9 +164,21 @@ const CONTEST = [
   {name:"Dean Cole", img:"assets/photos/Dean Cole.jpg", q:"\u201cI will come. I will see. I will conquer.\u201d"},
   {name:"Isaiah", img:"assets/photos/Isaiah.jpg", q:"\u201cI like it when you\u2019re mean. It does something to me.\u201d"},
   {name:"John Tucker", img:"assets/photos/john tucker.jpg", q:"\u201cJust find yourself a rebound.\u201d \u201cI volunteer as tribute.\u201d"},
-  {name:"Dean DiLaurentis", img:"assets/photos/Dean di Laurentis.jpg", q:"\u201cSeriously, just find yourself a rebound.\u201d"}
+  {name:"Dean DiLaurentis", img:"assets/photos/Dean di Laurentis.jpg", q:"\u201cSeriously, just find yourself a rebound.\u201d"},
+  {name:"Joshua", img:"assets/photos/joshua_the_hating_game.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Beau Eaton", img:"assets/photos/Beau_Eaton.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Clay Johnson", img:"assets/photos/clay_johnson.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Conor Harkness", img:"assets/photos/conor_harkness.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Xaden Riorson", img:"assets/photos/xaden_riorson.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Reed Royal", img:"assets/photos/Reed_Royal.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Ryan Shay", img:"assets/photos/ryan_shay.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Daniel Grant", img:"assets/photos/daniel_grant.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Nikolai Sokolov", img:"assets/photos/nikolai_sokolov.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Ylia Rozanov", img:"assets/photos/Ylia_rozanov.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Ginta", img:"assets/photos/Ginta.jpg", q:"Placeholder sentence, change me when I have more info"},
+  {name:"Pacey Witter", img:"assets/photos/pacey_witter.jpg", q:"Placeholder sentence, change me when I have more info"}
 ];
-const PAIRS1 = [[0,1],[2,3],[4,5],[6,7],[8,9],[10,11]];
+const PAIRS1 = [[0,1],[2,3],[4,5],[6,7],[8,9],[10,11],[12,13],[14,15],[16,17],[18,19],[20,21],[22,23]];
 const ROTATE = [IMG.bg05,IMG.bg07,IMG.bg09,IMG.bg11,IMG.bg13,IMG.bg15,IMG.bg17];
 const TIMER_SECONDS = 20, INTRO_COUNT = 3;
 const $=id=>document.getElementById(id);
@@ -183,8 +195,22 @@ let sel=0;                  // 0=left 1=right highlight
 let pickResolver=null;
 let enterResolver=null;
 
-const stage=$('stage'); stage.focus();
-stage.addEventListener('click',()=>stage.focus());
+const stage=$('stage');
+function fitStage(){
+  var vw = window.innerWidth || document.documentElement.clientWidth;
+  var vh = window.innerHeight || document.documentElement.clientHeight;
+  var w = vw, hh = vw*9/16;
+  if(hh > vh){ hh = vh; w = vh*16/9; }
+  stage.style.width  = Math.round(w)+'px';
+  stage.style.height = Math.round(hh)+'px';
+}
+fitStage();
+if(window.addEventListener){
+  window.addEventListener('resize', fitStage, false);
+  window.addEventListener('orientationchange', fitStage, false);
+}
+try{ stage.focus(); }catch(e){}
+stage.addEventListener('click',function(){ try{stage.focus();}catch(e){} });
 
 // central key handler for the TV remote
 function advance(){
@@ -194,19 +220,35 @@ function advance(){
   else if(phase==='champ'){ replay(); }
 }
 function handleKey(e){
-  const k=e.key, c=e.keyCode||e.which;
-  const isLeft  = k==='ArrowLeft'  || k==='Left'  || c===37;
-  const isRight = k==='ArrowRight' || k==='Right' || c===39;
-  const isOK    = k==='Enter' || k===' ' || k==='Spacebar' || k==='Select' || k==='OK'
-                  || c===13 || c===32 || c===23 /*android dpad center*/ || c===10009 /*some TVs*/;
+  var k = e.key || '';
+  var c = e.keyCode || e.which || 0;
+  // LEFT: keyboard, all TV brands (Samsung/LG/Tizen/webOS/Android/Fire/Vizio/Hisense)
+  var isLeft  = k==='ArrowLeft'  || k==='Left'  || c===37 || c===4 || c===21 || c===412;
+  // RIGHT
+  var isRight = k==='ArrowRight' || k==='Right' || c===39 || c===5 || c===22 || c===413;
+  // OK / SELECT / ENTER across remotes
+  var isOK = k==='Enter' || k==='Select' || k==='OK' || k===' ' || k==='Spacebar'
+             || c===13   // enter
+             || c===32   // space
+             || c===23   // android dpad center
+             || c===66   // android enter
+             || c===10009 // some Samsung
+             || c===195 || c===29443 // misc TV select
+             || c===415;  // play
   if(isLeft || isRight){
-    if(phase==='pick'){ sel = isLeft?0:1; paintSel(); e.preventDefault(); }
-    return;
+    if(phase==='pick'){ sel = isLeft?0:1; paintSel(); }
+    if(e.preventDefault) e.preventDefault();
+    return false;
   }
-  if(isOK){ e.preventDefault(); advance(); }
+  if(isOK){ if(e.preventDefault) e.preventDefault(); advance(); return false; }
 }
-window.addEventListener('keydown', handleKey, true);
-document.addEventListener('keydown', handleKey, true);
+if(window.addEventListener){
+  window.addEventListener('keydown', handleKey, true);
+  document.addEventListener('keydown', handleKey, true);
+} else {
+  // very old TV browsers
+  document.onkeydown = handleKey;
+}
 
 function paintSel(){
   $('cardL').classList.toggle('sel', sel===0);
