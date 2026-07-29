@@ -144,6 +144,7 @@
   </section>
 
   <canvas id="confetti"></canvas>
+  <audio id="bgm" src="assets/audio/theme.mp3" loop preload="auto"></audio>
   <div id="ov">
     <div id="ovLabel"></div><div id="ovBig"></div><div id="ovChamp"></div><div id="ovName"></div>
     <div id="ovHint" style="display:none">Enter o toca para jugar otra vez</div>
@@ -212,6 +213,17 @@ if(window.addEventListener){
 try{ stage.focus(); }catch(e){}
 stage.addEventListener('click',function(){ try{stage.focus();}catch(e){} });
 
+// background music: browsers block autoplay-with-sound until a user gesture,
+// so try immediately (works on permissive browsers) and again on first key/tap.
+var bgm = $('bgm'); var musicStarted = false;
+function startMusic(){
+  if(musicStarted) return;
+  var p = bgm.play();
+  if(p && p.then){ p.then(function(){ musicStarted = true; }).catch(function(){}); }
+  else { musicStarted = true; }
+}
+startMusic();
+
 // central key handler for the TV remote
 function advance(){
   if(phase==='title'){ goReglas(); }
@@ -220,6 +232,7 @@ function advance(){
   else if(phase==='champ'){ replay(); }
 }
 function handleKey(e){
+  startMusic();
   var k = e.key || '';
   var c = e.keyCode || e.which || 0;
   // LEFT: keyboard, all TV brands (Samsung/LG/Tizen/webOS/Android/Fire/Vizio/Hisense)
@@ -359,6 +372,7 @@ function timer(sec){
 
 /* ---- click / tap support (works alongside the remote keys) ---- */
 function tapCard(side){
+  startMusic();
   if(phase!=='pick') return;
   if(sel!==side){ sel=side; paintSel(); return; }   // first tap highlights
   if(pickResolver){ const r=pickResolver; pickResolver=null; r(sel); } // second tap confirms
@@ -367,6 +381,7 @@ $('cardL').addEventListener('click',()=>tapCard(0));
 $('cardR').addEventListener('click',()=>tapCard(1));
 // tapping anywhere advances the same things Enter does
 stage.addEventListener('click', e=>{
+  startMusic();
   if(e.target.closest('#cardL')||e.target.closest('#cardR')) return; // handled above
   if(phase==='title'){ goReglas(); }
   else if(phase==='reglas'){ if(enterResolver){const r=enterResolver;enterResolver=null;r();} }
