@@ -63,7 +63,7 @@
 
   .card{ position:absolute; width:23%; top:21%; border-radius:1.6vh; padding:1.4vh 1.4vh 2vh;
          display:flex; flex-direction:column; align-items:center; text-align:center;
-         transition:transform .18s; cursor:pointer; outline:none; }
+         transition:transform .18s; cursor:pointer; }
   #cardL{ left:20%; }
   #cardR{ right:20%; }
   .card .photo{ width:74%; height:38vh; border-radius:1.2vh; background:#e9dfe8 center/cover no-repeat;
@@ -128,19 +128,19 @@
       <span class="pill" id="roundLabel"></span>
       <span class="pill" id="matchCount"></span>
     </div>
-    <div class="card" id="cardL" tabindex="0">
+    <div class="card" id="cardL">
       <div class="photo" id="photoL"><span></span></div>
       <div class="nm" id="nmL"></div>
       <div class="quote" id="qL"></div>
     </div>
     <div id="bigTimer"><span id="timerNum"></span></div>
     <div id="vs" class="bubble">VS</div>
-    <div class="card" id="cardR" tabindex="0">
+    <div class="card" id="cardR">
       <div class="photo" id="photoR"><span></span></div>
       <div class="nm" id="nmR"></div>
       <div class="quote" id="qR"></div>
     </div>
-    <div class="hintbar" id="arenaHint">← → o toca para elegir · Enter o toca para confirmar</div>
+    <div class="hintbar" id="arenaHint">← → o toca para elegir · Enter o toca de nuevo para confirmar</div>
   </section>
 
   <canvas id="confetti"></canvas>
@@ -315,7 +315,6 @@ async function matchup(a,b,label,idx,total){
   $('arenaHint').style.display='block';
   sel=0; paintSel();
   phase='pick';
-  try{ $('cardL').focus(); }catch(e){} // gives TV D-pad focus-nav a starting point
   const stop=timer(TIMER_SECONDS);
   const pick=await new Promise(res=>{ pickResolver=res; });
   stop(); phase='busy';
@@ -372,23 +371,22 @@ function timer(sec){
 }
 
 /* ---- click / tap support (works alongside the remote keys) ---- */
-// A click/tap on a card commits immediately, matching the keyboard flow
-// (arrow highlights, Enter confirms in one press) now that real focus
-// tracking (below) keeps sel in sync with whichever card is highlighted.
 function tapCard(side){
   startMusic();
   if(phase!=='pick') return;
-  sel=side; paintSel();
-  if(pickResolver){ const r=pickResolver; pickResolver=null; r(sel); }
+  if(sel!==side){ sel=side; paintSel(); return; }   // first tap highlights
+  if(pickResolver){ const r=pickResolver; pickResolver=null; r(sel); } // second tap confirms
 }
 $('cardL').addEventListener('click',()=>tapCard(0));
 $('cardR').addEventListener('click',()=>tapCard(1));
-// webOS/Tizen's D-pad only hides the pointer and switches to real focus-based
-// navigation when there's a focusable element to land on; cardL/cardR now
-// have tabindex for exactly that reason. Track the highlight off real focus
-// events instead of arrow keydown, since these remotes don't send that.
-$('cardL').addEventListener('focus',()=>{ if(phase==='pick'){ sel=0; paintSel(); } });
-$('cardR').addEventListener('focus',()=>{ if(phase==='pick'){ sel=1; paintSel(); } });
+// Samsung/LG TV browsers drive an (often invisible) mouse cursor from the
+// D-pad and fire a click at the cursor position for OK, with no keydown
+// for the arrows themselves. Without hover feedback the highlight never
+// moves until you click, so a single OK looks like it "does nothing" the
+// first time. Mirror the highlight to cursor position as it crosses a card.
+function hoverCard(side){ if(phase==='pick' && sel!==side){ sel=side; paintSel(); } }
+$('cardL').addEventListener('mouseover',()=>hoverCard(0));
+$('cardR').addEventListener('mouseover',()=>hoverCard(1));
 // tapping anywhere advances the same things Enter does
 stage.addEventListener('click', e=>{
   startMusic();
